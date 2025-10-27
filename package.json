@@ -1,0 +1,41 @@
+{
+  "name": "local-mcp-filesystem",
+  "version": "1.0.0",
+  "description": "One-command local filesystem MCP server with automatic HTTPS tunnel",
+  "main": "lib/server.js",
+  "type": "module",
+  "bin": {
+    "local-mcp-filesystem": "./bin/cli.js",
+    "lmcp": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "dev": "node bin/cli.js --dev"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "filesystem",
+    "chatgpt",
+    "claude",
+    "ai",
+    "local-server",
+    "cloudflare-tunnel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.19.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arti-cat/mcp-bridge.git",
+    "directory": "packages/local-mcp-filesystem"
+  }
+}
