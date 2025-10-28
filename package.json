@@ -1,7 +1,7 @@
 {
   "name": "local-mcp-filesystem",
   "version": "1.0.0",
-  "description": "One-command local filesystem MCP server with automatic HTTPS tunnel",
+  "description": "Connect ChatGPT to your local filesystem in 60 seconds. One-command MCP server with automatic HTTPS tunnel for ChatGPT Developer Mode.",
   "main": "lib/server.js",
   "type": "module",
   "bin": {
@@ -17,12 +17,16 @@
     "model-context-protocol",
     "filesystem",
     "chatgpt",
+    "chatgpt-developer-mode",
     "claude",
     "ai",
     "local-server",
-    "cloudflare-tunnel"
+    "cloudflare-tunnel",
+    "mcp-bridge",
+    "stdio-http-bridge",
+    "remote-mcp-server"
   ],
-  "author": "",
+  "author": "articat <articat1066@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=18.19.0"
@@ -36,7 +40,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/arti-cat/mcp-bridge.git",
-    "directory": "packages/local-mcp-filesystem"
-  }
+    "url": "https://github.com/arti-cat/local-mcp-filesystem.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arti-cat/local-mcp-filesystem/issues"
+  },
+  "homepage": "https://github.com/arti-cat/local-mcp-filesystem#readme"
 }
