@@ -65,10 +65,15 @@ npx lmcp
       • Authentication: None
 
    3. Available tools in ChatGPT:
-      • search - Find files by pattern
-      • fetch - Read file contents
-      • list - List directory contents
-      • write - Create or update files
+      All filesystem tools from @modelcontextprotocol/server-filesystem including:
+      • read_file / read_text_file - Read file contents
+      • write_file - Create or update files
+      • list_directory - List directory contents
+      • search_files - Find files by pattern
+      • get_file_info - Get file metadata
+      • list_allowed_directories - Show accessible directories
+      • create_directory - Create new directories
+      • move_file - Move or rename files
 
 ────────────────────────────────────────────────────────────
 Press Ctrl+C to stop
@@ -173,39 +178,18 @@ Node.js >= 18.19 required.
 
 ## Available Tools in ChatGPT
 
-Once connected, ChatGPT can use these tools:
+Once connected, ChatGPT has access to all filesystem tools from `@modelcontextprotocol/server-filesystem`:
 
-### `search`
-Find files by pattern.
+- **read_file / read_text_file** - Read file contents
+- **write_file** - Create or update files  
+- **list_directory** - List directory contents
+- **search_files** - Find files by pattern
+- **get_file_info** - Get file metadata
+- **list_allowed_directories** - Show accessible directories
+- **create_directory** - Create new directories
+- **move_file** - Move or rename files
 
-**Example:**
-```
-Find all JavaScript files in the src directory
-```
-
-### `fetch`
-Read file contents.
-
-**Example:**
-```
-Read the contents of src/index.js
-```
-
-### `list`
-List directory contents.
-
-**Example:**
-```
-List all files in the current directory
-```
-
-### `write`
-Create or update files.
-
-**Example:**
-```
-Create a new file called README.md with "Hello World"
-```
+ChatGPT will automatically use these tools when you ask it to work with files.
 
 ---
 
@@ -264,60 +248,27 @@ The process runs with your user permissions. If you can't read a file, neither c
 
 ---
 
-## Comparison to Other Packages
-
-### vs `chatgpt-mcp-filesystem`
-
-- ✅ Same functionality
-- ✅ Better name (no "chatgpt")
-- ✅ One command (vs two terminals)
-- ✅ Better UX (formatted output, URL ready to copy)
-
-### vs Manual Setup (stdio-adapter + tunnel)
-
-**Manual:**
-```bash
-# Terminal 1
-cd stdio-adapter
-npm run dev
-
-# Terminal 2
-cloudflared tunnel --url http://localhost:3000
-
-# Copy URL manually
-```
-
-**This package:**
-```bash
-npx local-mcp-filesystem
-# Everything starts, URL ready to copy
-```
-
----
-
 ## Development
 
 ### Running from Source
 
 ```bash
-cd packages/local-mcp-filesystem
+git clone https://github.com/arti-cat/local-mcp-filesystem.git
+cd local-mcp-filesystem
 npm install
 npm start
 ```
 
-### Publishing
+### Contributing
 
-```bash
-npm version patch
-npm publish
-```
+Contributions are welcome! Please open an issue or pull request on GitHub.
 
 ---
 
 ## Related Projects
 
-- [Universal MCP Bridge](../../) - Bridge for remote MCP servers (like Context7)
 - [@modelcontextprotocol/server-filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) - The underlying filesystem MCP server
+- [Model Context Protocol](https://modelcontextprotocol.io/) - Official MCP documentation
 
 ---
 
@@ -329,10 +280,12 @@ MIT
 
 ## Support
 
-- 🐛 [Report a bug](https://github.com/arti-cat/mcp-bridge/issues)
-- 💡 [Request a feature](https://github.com/arti-cat/mcp-bridge/issues)
-- 📖 [Documentation](https://github.com/arti-cat/mcp-bridge)
+- 🐛 [Report a bug](https://github.com/arti-cat/local-mcp-filesystem/issues)
+- 💡 [Request a feature](https://github.com/arti-cat/local-mcp-filesystem/issues)
+- 📖 [Documentation](https://github.com/arti-cat/local-mcp-filesystem)
 
 ---
 
-**Made for developers who want filesystem access in ChatGPT without the hassle.**
+## About
+
+A simple, reliable bridge for connecting ChatGPT to your local filesystem using the Model Context Protocol.
