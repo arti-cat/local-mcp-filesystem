@@ -19,6 +19,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { homedir } from 'os';
 import { existsSync } from 'fs';
+import { bin, install } from 'cloudflared';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,13 +39,19 @@ function log(message, color = colors.reset) {
   console.log(`${color}${message}${colors.reset}`);
 }
 
+function debug(...args) {
+  if (process.env.DEBUG === '1') {
+    console.log('[DEBUG]', ...args);
+  }
+}
+
 function parseArgs() {
   const args = process.argv.slice(2);
   const config = {
     port: 3000,
     dir: process.cwd(),
     tunnelUrl: null,
-    dev: false,
+    dev: true, // Enable dev mode by default
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -98,10 +105,23 @@ function showHelp() {
 }
 
 async function checkCloudflared() {
-  return new Promise((resolve) => {
-    const check = spawn('which', ['cloudflared']);
-    check.on('close', (code) => resolve(code === 0));
-  });
+  try {
+    // The cloudflared npm package handles installation automatically
+    // The bin path is set by the package
+    debug('Cloudflared binary path:', bin);
+    
+    // Install if not already present
+    if (!existsSync(bin)) {
+      log('   Installing cloudflared binary...', colors.cyan);
+      await install(bin);
+      log('   ✓ Cloudflared installed', colors.green);
+    }
+    
+    return true;
+  } catch (error) {
+    debug('Cloudflared installation check failed:', error.message);
+    return false;
+  }
 }
 
 async function startAdapter(config) {
@@ -110,49 +130,59 @@ async function startAdapter(config) {
     log(`   Root directory: ${config.dir}`, colors.cyan);
     log(`   Port: ${config.port}`, colors.cyan);
 
+    // Kill any existing process on the port
+    try {
+      spawn('fuser', ['-k', `${config.port}/tcp`], { stdio: 'ignore' });
+    } catch (err) {
+      // Ignore errors if fuser is not available or port is not in use
+    }
+
     const adapterPath = join(__dirname, '../lib/server.js');
 
     const adapter = spawn('node', [adapterPath], {
       env: {
         ...process.env,
         PORT: config.port.toString(),
-        ROOT_DIR: config.dir,
+        ALLOWED_DIR: config.dir,
         DEBUG: config.dev ? '1' : '0',
       },
-      stdio: config.dev ? 'inherit' : ['ignore', 'pipe', 'pipe'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let started = false;
 
     adapter.stdout?.on('data', (data) => {
       const output = data.toString();
-      if (output.includes('listening') || output.includes('started')) {
+      console.log('[ADAPTER STDOUT]', output);
+      if (output.includes('ChatGPT Filesystem Adapter Running') || output.includes('listening')) {
         if (!started) {
           started = true;
           log('✓ Adapter running', colors.green);
           resolve(adapter);
         }
       }
-      if (config.dev) {
-        process.stdout.write(output);
-      }
     });
 
     adapter.stderr?.on('data', (data) => {
-      if (config.dev) {
-        process.stderr.write(data);
-      }
+      console.log('[ADAPTER STDERR]', data.toString());
     });
 
-    adapter.on('error', reject);
+    adapter.on('error', (err) => {
+      console.error('[ADAPTER ERROR]', err);
+      reject(err);
+    });
 
-    // Give it 3 seconds to start
+    adapter.on('exit', (code, signal) => {
+      console.log(`[ADAPTER EXIT] code: ${code}, signal: ${signal}`);
+    });
+
+    // Give it 5 seconds to start
     setTimeout(() => {
       if (!started) {
-        log('✓ Adapter started (timeout)', colors.green);
+        log('⚠ Adapter started (timeout) - check if it\'s actually running', colors.yellow);
         resolve(adapter);
       }
-    }, 3000);
+    }, 5000);
   });
 }
 
@@ -160,7 +190,7 @@ async function startTunnel(port, config) {
   return new Promise((resolve, reject) => {
     log('\n🌐 Starting Cloudflare tunnel...', colors.bright);
 
-    const tunnel = spawn('cloudflared', [
+    const tunnel = spawn(bin, [
       'tunnel',
       '--url',
       `http://localhost:${port}`,
@@ -170,10 +200,10 @@ async function startTunnel(port, config) {
 
     let tunnelUrl = null;
 
-    tunnel.stdout.on('data', (data) => {
+    const processOutput = (data) => {
       const output = data.toString();
 
-      // Look for tunnel URL
+      // Look for tunnel URL in both stdout and stderr
       const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
       if (urlMatch && !tunnelUrl) {
         tunnelUrl = urlMatch[0];
@@ -184,13 +214,10 @@ async function startTunnel(port, config) {
       if (config.dev) {
         process.stdout.write(output);
       }
-    });
+    };
 
-    tunnel.stderr.on('data', (data) => {
-      if (config.dev) {
-        process.stderr.write(data);
-      }
-    });
+    tunnel.stdout.on('data', processOutput);
+    tunnel.stderr.on('data', processOutput);
 
     tunnel.on('error', reject);
 
@@ -225,12 +252,10 @@ async function main() {
       const hasCloudflared = await checkCloudflared();
 
       if (!hasCloudflared) {
-        log('\n⚠️  Cloudflared not found!', colors.yellow);
-        log('\nInstall cloudflared:', colors.cyan);
-        log('  macOS:   brew install cloudflare/cloudflare/cloudflared');
-        log('  Linux:   https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/');
-        log('  Windows: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/\n');
-        log('Or provide your own tunnel URL with --tunnel-url\n', colors.cyan);
+        log('\n✗ Error: Cloudflared installation failed', colors.red);
+        log('\nYou can provide your own tunnel URL with --tunnel-url\n', colors.cyan);
+        log('Example:', colors.cyan);
+        log('  npx local-mcp-filesystem --tunnel-url https://your-tunnel.trycloudflare.com\n');
         process.exit(1);
       }
 

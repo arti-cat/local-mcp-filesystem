@@ -124,20 +124,9 @@ npx local-mcp-filesystem --dev
 
 ### Cloudflare Tunnel (cloudflared)
 
-**macOS:**
-```bash
-brew install cloudflare/cloudflare/cloudflared
-```
+**Automatically installed!** The `cloudflared` binary is now included as an npm dependency and will be automatically downloaded when you install the package. No manual installation required.
 
-**Linux:**
-```bash
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
-chmod +x cloudflared-linux-amd64
-sudo mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
-```
-
-**Windows:**
-Download from [Cloudflare Downloads](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+If you prefer to use your own cloudflared installation, you can provide a custom tunnel URL with `--tunnel-url`.
 
 ### Node.js
 
@@ -252,16 +241,9 @@ npx local-mcp-filesystem --dir /  # Dangerous!
 
 ### "cloudflared: command not found"
 
-Install cloudflared (see [Requirements](#requirements))
+If you prefer to use your own cloudflared installation, you can provide a custom tunnel URL with `--tunnel-url`.
 
-Or provide your own tunnel:
-```bash
-# Terminal 1
-cloudflared tunnel --url http://localhost:3000
-
-# Terminal 2 (use the URL from above)
-npx local-mcp-filesystem --tunnel-url https://xyz.trycloudflare.com
-```
+Or, make sure you have installed the package correctly.
 
 ### "Address already in use"
 
