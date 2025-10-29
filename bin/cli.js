@@ -20,6 +20,7 @@ import { dirname, join } from 'path';
 import { homedir } from 'os';
 import { existsSync } from 'fs';
 import { bin, install } from 'cloudflared';
+import killPort from 'kill-port';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -125,16 +126,18 @@ async function checkCloudflared() {
 }
 
 async function startAdapter(config) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     log('\n🚀 Starting filesystem adapter...', colors.bright);
     log(`   Root directory: ${config.dir}`, colors.cyan);
     log(`   Port: ${config.port}`, colors.cyan);
 
-    // Kill any existing process on the port
+    // Kill any existing process on the port (cross-platform)
     try {
-      spawn('fuser', ['-k', `${config.port}/tcp`], { stdio: 'ignore' });
+      await killPort(config.port);
+      debug(`Killed existing process on port ${config.port}`);
     } catch (err) {
-      // Ignore errors if fuser is not available or port is not in use
+      // Ignore errors if port is not in use
+      debug(`No process to kill on port ${config.port}`);
     }
 
     const adapterPath = join(__dirname, '../lib/server.js');

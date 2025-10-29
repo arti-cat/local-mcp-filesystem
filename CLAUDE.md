@@ -38,6 +38,11 @@ curl http://localhost:3000/healthz
 curl -X POST http://localhost:3000 \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+# Test tools/call (example: list directory)
+curl -X POST http://localhost:3000 \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_directory","arguments":{"path":"."}}}'
 ```
 
 ## Architecture
@@ -110,12 +115,15 @@ npm install -g local-mcp-filesystem
 npx local-mcp-filesystem
 ```
 
-The `bin` field in [package.json](package.json) creates two executable aliases: `local-mcp-filesystem` and `lmcp`.
+The `bin` field in [package.json](package.json) creates two executable aliases:
+- `local-mcp-filesystem` - Full name
+- `lmcp` - Short alias for convenience
 
 ## Common Gotchas
 
-1. **Port conflicts**: CLI attempts `fuser -k` to kill processes on the port before starting
+1. **Port conflicts**: CLI attempts `fuser -k` to kill processes on the port before starting (Linux only)
 2. **Cloudflared binary**: Auto-installed via npm package on first run
 3. **Process cleanup**: SIGINT/SIGTERM handlers ensure both adapter and tunnel are killed together
 4. **Request timeout**: Adapter waits max 30s for MCP server responses
 5. **Initialization timing**: 100ms delay before sending initialize to MCP server to ensure STDIO is ready
+6. **Security**: The `ALLOWED_DIR` parameter restricts filesystem access. Always use the most specific directory needed.

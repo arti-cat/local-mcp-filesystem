@@ -35,7 +35,8 @@
     "@modelcontextprotocol/sdk": "^1.0.0",
     "fastify": "^5.0.0",
     "dotenv": "^16.3.1",
-    "cloudflared": "^0.7.0"
+    "cloudflared": "^0.7.0",
+    "kill-port": "^2.0.1"
   },
   "devDependencies": {},
   "repository": {
