@@ -1,6 +1,6 @@
 {
   "name": "local-mcp-filesystem",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Connect ChatGPT to your local filesystem in 60 seconds. One-command MCP server with automatic HTTPS tunnel for ChatGPT Developer Mode.",
   "main": "lib/server.js",
   "type": "module",
